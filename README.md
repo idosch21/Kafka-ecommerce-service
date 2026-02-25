@@ -22,6 +22,8 @@ Run the following command in the root directory to build and start the entire cl
 
 ```bash
 docker-compose up --build
+```
+
 🛠 API Reference & Testing (Postman)
 1. Create a New Order
 Producer (CartService) - Port 5000
