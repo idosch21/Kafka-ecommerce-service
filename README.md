@@ -1,4 +1,4 @@
-🛒 Microservices Order System (Kafka + .NET 8)
+# 🛒 Microservices Order System (Kafka + .NET 8)
 
 A distributed order management system utilizing a **Producer-Consumer** architecture. This project demonstrates event-driven communication between microservices using **Apache Kafka** and **Docker Compose**.
 
@@ -19,8 +19,10 @@ A distributed order management system utilizing a **Producer-Consumer** architec
 
 ### Deployment
 Run the following command in the root directory to build and start the entire cluster:
+
 ```bash
 docker-compose up --build
+
 🛠 API Reference & Testing (Postman)
 1. Create a New Order
 Producer (CartService) - Port 5000
@@ -59,45 +61,31 @@ Method: GET
 
 URL: http://localhost:7000/order/order-details?orderId=test
 
-4. Bulk Topic Audit
-Consumer (OrderService) - Port 7000
-
-Method: GET
-
-URL: http://localhost:7000/order/getAllOrderIdsFromTopic?topicName=order-created-topic
-
-Supported Topics: order-created-topic, order-updated-topic
-
 📡 Kafka Implementation Details
 Topic Strategy
 order-created-topic: Used for publishing new order events.
 
 order-updated-topic: Used for publishing events when an order status changes.
 
-Message Keying: All messages use OrderId as the key. This ensures that all events for the same order are processed in the correct sequence by the same consumer instance.
+Message Keying: All messages use OrderId as the key. This ensures chronological sequence per order.
 
 Performance Observation (Initial Lag)
 During testing, a delay (30s to 3m) was observed during the first update event.
 
-Technical Root Cause: This is attributed to the initial Kafka Consumer Group Rebalance and metadata synchronization that occurs when a new topic is dynamically created.
+Technical Root Cause: This is attributed to the initial Kafka Consumer Group Rebalance occurring when a new topic is dynamically created.
 
-Result: Subsequent updates are processed instantaneously once the consumer group stabilizes.
+Result: Subsequent updates are processed instantaneously once the group stabilizes.
 
 🛡️ Error Handling & Resilience
 1. Kafka Connection & Availability
-Producer/Consumer: Implemented a retry mechanism with exponential backoff to ensure transient connection issues do not result in message loss.
+Producer/Consumer: Implemented a retry mechanism with exponential backoff.
 
 Startup Delays: The producer starts 30s after deployment and the consumer 37s after deployment to ensure the Kafka Broker is fully operational.
 
 2. Message Processing Failures
-Idempotency: The consumer is designed to be idempotent; processing the same message multiple times will not lead to inconsistent data.
+Idempotency: The consumer is designed to be idempotent.
 
-Manual Offset Control: Offsets are committed only after successful processing to prevent losing messages during a crash.
-
-3. Service Health Checks
-Health checks verify the readiness of Kafka before services attempt to connect.
-
-CartService and OrderService utilize HTTP-based checks to confirm they are operational before accepting traffic.
+Manual Offset Control: Offsets are committed only after successful processing to prevent data loss.
 
 📄 Program Names
 Producer: CartService
