@@ -22,7 +22,6 @@ Run the following command in the root directory to build and start the entire cl
 
 ```bash
 docker-compose up --build
-
 🛠 API Reference & Testing (Postman)
 1. Create a New Order
 Producer (CartService) - Port 5000
@@ -54,38 +53,31 @@ JSON
 }
 Note: To update an existing order, simply change the status string to whatever you want it to be.
 
-3. Get Order Details
-Consumer (OrderService) - Port 7000
-
-Method: GET
-
-URL: http://localhost:7000/order/order-details?orderId=test
-
 📡 Kafka Implementation Details
 Topic Strategy
 order-created-topic: Used for publishing new order events.
 
 order-updated-topic: Used for publishing events when an order status changes.
 
-Message Keying: All messages use OrderId as the key. This ensures chronological sequence per order.
+Message Keying: All messages use OrderId as the key. This ensures that all events for the same order are processed in the correct sequence by the same consumer instance.
 
 Performance Observation (Initial Lag)
 During testing, a delay (30s to 3m) was observed during the first update event.
 
-Technical Root Cause: This is attributed to the initial Kafka Consumer Group Rebalance occurring when a new topic is dynamically created.
+Technical Root Cause: This is attributed to the initial Kafka Consumer Group Rebalance and metadata synchronization that occurs when a new topic is dynamically created.
 
-Result: Subsequent updates are processed instantaneously once the group stabilizes.
+Result: Subsequent updates are processed instantaneously once the consumer group stabilizes.
 
 🛡️ Error Handling & Resilience
 1. Kafka Connection & Availability
-Producer/Consumer: Implemented a retry mechanism with exponential backoff.
+Producer/Consumer: Implemented a retry mechanism with exponential backoff to ensure transient connection issues do not result in message loss.
 
 Startup Delays: The producer starts 30s after deployment and the consumer 37s after deployment to ensure the Kafka Broker is fully operational.
 
 2. Message Processing Failures
-Idempotency: The consumer is designed to be idempotent.
+Idempotency: The consumer is designed to be idempotent; processing the same message multiple times will not lead to inconsistent data.
 
-Manual Offset Control: Offsets are committed only after successful processing to prevent data loss.
+Manual Offset Control: Offsets are committed only after successful processing to prevent losing messages during a crash.
 
 📄 Program Names
 Producer: CartService
