@@ -29,9 +29,7 @@ docker-compose up --build
 Producer (CartService) - Port 5000
 
 Method: POST
-
 URL: http://localhost:5000/Order/create-order
-
 Body (JSON):
 
 JSON
@@ -39,13 +37,11 @@ JSON
   "OrderId": "test",
   "ItemsNum": 2
 }
+
 2. Update Order Status
 Producer (CartService) - Port 5000
-
 Method: PUT
-
 URL: http://localhost:5000/Order/update-order
-
 Body (JSON):
 
 JSON
@@ -82,6 +78,7 @@ Idempotency: The consumer is designed to be idempotent; processing the same mess
 Manual Offset Control: Offsets are committed only after successful processing to prevent losing messages during a crash.
 
 📄 Program Names
+
 Producer: CartService
 
 Consumer: OrderService
