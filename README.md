@@ -24,7 +24,7 @@ Run the following command in the root directory to build and start the entire cl
 docker-compose up --build
 ```
 
-🛠 API Reference & Testing (Postman)
+### 🛠 API Reference & Testing (Postman)
 1. Create a New Order
 Producer (CartService) - Port 5000
 
@@ -55,7 +55,7 @@ JSON
 }
 Note: To update an existing order, simply change the status string to whatever you want it to be.
 
-📡 Kafka Implementation Details
+### 📡 Kafka Implementation Details
 Topic Strategy
 order-created-topic: Used for publishing new order events.
 
@@ -70,7 +70,7 @@ Technical Root Cause: This is attributed to the initial Kafka Consumer Group Reb
 
 Result: Subsequent updates are processed instantaneously once the consumer group stabilizes.
 
-🛡️ Error Handling & Resilience
+### 🛡️ Error Handling & Resilience
 1. Kafka Connection & Availability
 Producer/Consumer: Implemented a retry mechanism with exponential backoff to ensure transient connection issues do not result in message loss.
 
