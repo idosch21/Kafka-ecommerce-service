@@ -1,0 +1,70 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - app-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29093:29093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29093,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true" # <--- Fixes the "Unknown Topic" error
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "cub kafka-ready -b kafka:29093 1 30"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  cart-service:
+    build:
+      context: ./ProducerEx2/CartService
+      dockerfile: Dockerfile
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "5000:8080" # <--- Changed from 80 to 8080 to match logs
+    environment:
+      Kafka__BootstrapServers: kafka:29093
+      Kafka__OrderCreatedTopic: order-created-topic
+      Kafka__OrderUpdatedTopic: order-updated-topic
+      ASPNETCORE_URLS: "http://+:8080" # Forces the app to use 8080
+    networks:
+      - app-network
+
+  order-service:
+    build:
+      context: ./ConsumerEx2/OrderService
+      dockerfile: Dockerfile
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "7000:8080"
+    environment:
+      Kafka__BootstrapServers: kafka:29093
+      Kafka__OrderCreatedTopic: order-created-topic
+      Kafka__OrderUpdatedTopic: order-updated-topic
+      Kafka__ConsumerGroupId: order-service-group
+      ASPNETCORE_URLS: "http://+:8080" # Forces the app to use 8080
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

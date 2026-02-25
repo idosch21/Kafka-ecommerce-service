@@ -1,0 +1,28 @@
+# --- .NET Build Output ---
+[Bb]in/
+[Oo]bj/
+out/
+publish/
+
+# --- IDE Settings ---
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# --- Docker & OS ---
+.dockerignore
+.DS_Store
+Thumbs.db
+
+# --- Environment & Sensitive Data ---
+.env
+*.pfx
+*.certificate
+appsettings.Development.json
+
+# --- Kafka / Persistence (If your volumes map to local folders) ---
+/kafka-data/
+/zookeeper-data/
